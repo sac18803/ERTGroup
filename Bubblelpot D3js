@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="description" content="D3byEX 6.4" />
+    <meta charset="utf-8">
+</head>
+<body>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script>
+        var url = "fert_pop_exp.csv";
+        d3.csv(url, function (error, rawData) {
+            var data = rawData.map(function (d) {
+                return {
+                    Grade: +d.Grade,
+                    Study_Time: +d.Study_Time,
+                    Income: +d.Income,
+                    Major: d.Major
+                }
+            });
+
+            var minBubbleSize = 5, maxBubbleSize = 50;
+            var margin = {
+                left: maxBubbleSize, top: maxBubbleSize,
+                bottom: maxBubbleSize, right: maxBubbleSize
+            };
+            var axisPadding = 10;
+            var graphWidth = 500, graphHeight = 400;
+            var totalWidth = graphWidth + margin.left + margin.right;
+            var totalHeight = graphHeight + margin.top + margin.bottom;
+
+
+            var Grade_earned = data.map(function (d) { return d.Grade; });
+            var StudyTime = data.map(function (d) { return d.Study_Time; });
+            var Income = data.map(function (d) { return d.Income; });
+            var Majors = data.map(function (d) { return d.Major; });
+
+            var xScale = d3.scale.linear()
+                .domain([d3.min(Grade_earned), d3.max(Grade_earned)])
+                .range([0, graphWidth]);
+
+            var yScale = d3.scale.linear()
+                .domain([d3.max(StudyTime), 0])
+                .range([0, graphHeight]);
+
+            var IncDomain = [d3.min(Income), d3.max(Income)];
+            var IncScale = d3.scale.linear()
+                .domain(IncDomain)
+                .range([minBubbleSize, maxBubbleSize]);
+
+            var uniqueMajors = d3.set(Majors).values();
+            var MajorColorMap = d3.scale.ordinal()
+                .domain(uniqueMajors)
+                .range(d3.scale.category10().range());
+
+            var svg = d3.select("body").append('svg')
+                .attr('width', totalWidth)
+                .attr('height', totalHeight);
+
+
+            var yAxis = d3.svg.axis().scale(yScale).orient('left');
+            var yAxisNodes = svg.append('g')
+                .attr('transform', 'translate(' + (margin.left - axisPadding) + ',' + margin.top + ')')
+                .call(yAxis);
+            styleAxisNodes(yAxisNodes);
+            var xAxis = d3.svg.axis().scale(xScale).orient('bottom');
+            var xAxisNodes = svg.append('g')
+                .attr('transform', 'translate(' + margin.left + ',' + (totalHeight - margin.bottom + axisPadding) + ')')
+                .call(xAxis);
+            styleAxisNodes(xAxisNodes);
+
+            svg.append('g')
+                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+                .selectAll('circle')
+                .data(data)
+                .enter()
+                .append('circle')
+                .each(function (d) {
+                    d3.select(this).attr({
+                        cx: xScale(d.Grade),
+                        cy: yScale(d.Study_Time),
+                        r: IncScale(d.Income),
+                        fill: MajorColorMap(d.Major),
+                        stroke: MajorColorMap(d.Major),
+                        'fill-opacity': 0.5
+                    });
+                });
+        });
+        function styleAxisNodes(axisNodes) {
+            axisNodes.selectAll('.domain')
+                .attr({
+                    fill: 'none',
+                    'stroke-width': 1,
+                    stroke: 'black'
+                });
+            axisNodes.selectAll('.tick line')
+                .attr({
+                    fill: 'none',
+                    'stroke-width': 1,
+                    stroke: 'black'
+                });
+        }
+    </script>
+</body>
+</html>
