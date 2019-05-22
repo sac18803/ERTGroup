@@ -4,13 +4,13 @@
 <body>
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script>
-        var url = 'family.json';
+        var url = 'university.json';
         d3.json(url, function (error, data) {
             var width = 500, height = 500,
                 nodeRadius = 20,
                 margin = {
                     left: 30, top: 1,
-                    bottom: 1, right: 30
+                    bottom: 1, right: 45
                 };
 
             var svg = d3.select('body')
