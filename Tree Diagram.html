@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script>
+        var url = 'family.json';
+        d3.json(url, function (error, data) {
+            var width = 500, height = 500,
+                nodeRadius = 20,
+                margin = {
+                    left: 30, top: 1,
+                    bottom: 1, right: 30
+                };
+
+            var svg = d3.select('body')
+                .append('svg')
+                .attr({
+                    width: width,
+                    height: height
+                });
+
+            var mainGroup = svg.append('g')
+                .attr('transform', 'translate(' + margin.left + ',' +
+                                                  margin.top + ')');
+
+            var tree = d3.layout.tree()
+                .size([
+                    height - (margin.bottom + margin.top),
+                    width - (margin.left + margin.right),
+                ]);
+
+            var nodes = tree.nodes(data);
+            var links = tree.links(nodes);
+
+            var diagonal = d3.svg.diagonal()
+                .projection(function (d) {
+                    return [d.y, d.x];
+                });
+
+            mainGroup.selectAll('path')
+                .data(links)
+                .enter()
+                .append('path', 'g')
+                .attr({
+                    'd': diagonal,
+                    fill: 'none',
+                    stroke: 'green',
+                    'stroke-width': 2
+                });
+
+            var circleGroups = mainGroup.selectAll('g')
+                .data(nodes)
+                .enter()
+                .append('g')
+                .attr('transform', function (d) {
+                    return 'translate(' + d.y + ',' + d.x + ')';
+                });
+
+            circleGroups.append('circle')
+                .attr({
+                    r: nodeRadius,
+                    fill: 'gray',
+                    stroke: 'orange',
+                    'stroke-width': 3
+                });
+
+            circleGroups.append('text')
+                .text(function (d) {
+                    return d.name;
+                })
+                .attr('y', function (d) {
+                    return d.children || d._children ?
+                        -nodeRadius * 2 : nodeRadius * 2;
+                })
+                .attr({
+                    dy: '.5em',
+                    'text-anchor': 'middle',
+                    'fill-opacity': 1
+                })
+                .style('font', '11px sans-serif');
+        });
+    </script>
+</body>
+</html>
